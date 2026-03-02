@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff0080;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00ffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00bcd4;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Terminal window -->
+  <rect x="10" y="15" width="80" height="70" rx="5" ry="5" fill="#0d0d0d" stroke="url(#pinkGrad)" stroke-width="2"/>
+  
+  <!-- Terminal header -->
+  <rect x="10" y="15" width="80" height="15" rx="5" ry="5" fill="url(#pinkGrad)" clip-path="inset(0 0 60 0)"/>
+  <circle cx="22" cy="22" r="3" fill="#ff5f7a"/>
+  <circle cx="32" cy="22" r="3" fill="#ffd93d"/>
+  <circle cx="42" cy="22" r="3" fill="#6bcb77"/>
+  
+  <!-- Screen content -->
+  <rect x="18" y="35" width="64" height="45" fill="#0a0a0a"/>
+  
+  <!-- Prompt -->
+  <text x="22" y="50" font-family="monospace" font-size="6" fill="#00ffff">❯</text>
+  <text x="30" y="50" font-family="monospace" font-size="5" fill="#ff6b9d">_</text>
+  
+  <!-- Cursor blink line -->
+  <line x1="36" y1="45" x2="36" y2="55" stroke="#00ffff" stroke-width="1" filter="url(#glow)">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </line>
+  
+  <!-- Nya text -->
+  <text x="22" y="65" font-family="monospace" font-size="5" fill="#ff6b9d" font-weight="bold">NyaShell</text>
+  <text x="22" y="73" font-family="monospace" font-size="4" fill="#6bcb77">TUI v1.0</text>
+  
+  <!-- Decorative elements -->
+  <text x="75" y="75" font-family="monospace" font-size="4" fill="#ffd93d">✨</text>
+</svg>
