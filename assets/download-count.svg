@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" width="120" height="40">
+  <defs>
+    <linearGradient id="downloadGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4ecdc4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00ffff;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect x="0" y="0" width="120" height="40" rx="8" ry="8" fill="#0d0d0d" stroke="url(#downloadGrad)" stroke-width="2"/>
+  
+  <!-- Download icon -->
+  <g transform="translate(10, 8) scale(0.6)" fill="url(#downloadGrad)" filter="url(#glow)">
+    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+  </g>
+  
+  <!-- Download count text -->
+  <text x="45" y="18" font-family="monospace" font-size="12" font-weight="bold" fill="#4ecdc4">0</text>
+  <text x="45" y="28" font-family="monospace" font-size="8" fill="#00ffff">DOWNLOADS</text>
+  
+  <!-- Decorative line -->
+  <line x1="35" y1="10" x2="35" y2="30" stroke="url(#downloadGrad)" stroke-width="1"/>
+</svg>
