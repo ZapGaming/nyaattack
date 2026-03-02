@@ -1,17 +1,24 @@
-# <div align="center">✨ NyaShell TUI ✨</div>
-
 <div align="center">
 
-![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)
-![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![Terminal](https://img.shields.io/badge/Terminal-4D4D4D?style=for-the-badge&logo=gnome-terminal&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
-![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg?style=for-the-badge)
-![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg?style=for-the-badge)
+<img src="assets/logo.svg" alt="NyaShell Logo" width="120" height="120"/>
+
+# ✨ NyaShell TUI ✨
+
+[![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
+[![Terminal](https://img.shields.io/badge/Terminal-4D4D4D?style=for-the-badge&logo=gnome-terminal&logoColor=white)](https://github.com/microsoft/terminal)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+[![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg?style=for-the-badge)](https://github.com/ZapGaming/nyashell/actions)
+[![Version](https://img.shields.io/badge/Version-1.0.0-blue.svg?style=for-the-badge)](https://github.com/ZapGaming/nyashell/releases)
+[![Platform](https://img.shields.io/badge/Platform-Windows_10%2F11-0078D6?style=for-the-badge)](https://www.microsoft.com/windows)
+[![Size](https://img.shields.io/badge/Size-~1.5_MB-ff6b9d?style=for-the-badge)](https://github.com/ZapGaming/nyashell/releases/download/v1.0.0/nyashell.exe)
+[![Downloads](https://img.shields.io/github/downloads/ZapGaming/nyashell/total?color=00ffff&label=Downloads&style=for-the-badge)](https://github.com/ZapGaming/nyashell/releases)
+
+<img src="assets/badge.svg" alt="NyaShell Badge" style="vertical-align: middle; margin: 10px;"/>
 
 **A beautiful, modern terminal TUI (Text User Interface) for Windows with real-time system monitoring, Git integration, and stunning visual effects.**
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Screenshots](#-screenshots) • [Architecture](#-architecture) • [Configuration](#-configuration) • [Contributing](#-contributing)
+[🚀 Features](#-features) • [📦 Installation](#-installation) • [🎮 Usage](#-usage) • [📸 Screenshots](#-screenshots) • [🏗️ Architecture](#-architecture) • [⚙️ Configuration](#-configuration) • [🤝 Contributing](#-contributing)
 
 </div>
 
@@ -65,6 +72,52 @@
 │ Network: ↓ 1.2 MB ↑ 456 KB                                                 │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
+
+</div>
+
+---
+
+## 🎨 Custom Assets & Website
+
+<div align="center">
+
+### Custom SVG Icons & Badges
+
+All assets are hand-crafted with ❤️ using the NyaShell color palette:
+
+| Asset | Preview | Description |
+|-------|---------|-------------|
+| **Logo** | <img src="assets/logo.svg" width="60" alt="logo"/> | Terminal window with NyaShell branding |
+| **Badge** | <img src="assets/badge.svg" width="100" alt="badge"/> | Project badge with version info |
+| **Stars** | <img src="assets/stars.svg" width="100" alt="stars"/> | Decorative star pattern |
+| **Fork** | <img src="assets/fork.svg" width="40" alt="fork"/> | GitHub fork icon (gradient) |
+| **Star Count** | <img src="assets/star-count.svg" width="120" alt="star count"/> | Dynamic star count badge |
+| **Fork Count** | <img src="assets/fork-count.svg" width="120" alt="fork count"/> | Dynamic fork count badge |
+| **Issue Count** | <img src="assets/issue-count.svg" width="120" alt="issue count"/> | Dynamic issue count badge |
+| **Download Count** | <img src="assets/download-count.svg" width="120" alt="download count"/> | Dynamic download count badge |
+
+### 🌐 GitHub Pages Website
+
+Check out our beautiful **Liquid Glass** themed website:
+
+👉 **[https://zapgaming.github.io/nyashell/](https://zapgaming.github.io/nyashell/)**
+
+Features:
+- ✨ **Liquid glass morphism** effects with backdrop blur
+- 🌊 **Animated gradient background** with radial pulses
+- 📱 **Fully responsive** design for all devices
+- 🎯 **Smooth scroll** navigation with reveal animations
+- 📊 **Animated counters** for stats
+- 💻 **Terminal preview** with syntax highlighting
+- 🎨 **Custom color scheme** matching NyaShell TUI
+
+The site is built with pure HTML/CSS/JS and showcases:
+- Hero section with call-to-action buttons
+- Stats cards with animated numbers
+- Feature grid with glass cards
+- Terminal UI preview
+- Installation instructions
+- Direct download link
 
 </div>
 
