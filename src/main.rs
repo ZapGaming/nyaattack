@@ -96,25 +96,14 @@ enum DropdownType {
     Background,
 }
 
-const ATTACK_COMMANDS: &[(&str, &str)] = &[
-    ("wifi scan", "Scan for WiFi networks"),
-    ("wifi deauth", "Send deauth packets"),
-    ("wifi handshake", "Capture handshake"),
-    ("wifi crack", "Crack WPA2 password"),
-    ("wifi eviltwin", "Create rogue AP"),
-    ("ble scan", "Scan Bluetooth LE"),
-    ("ble jam", "Block BLE signals"),
-    ("ble inject", "BLE HID injection"),
-    ("usb attack", "USB HID attack"),
-    ("usb harvest", "Harvest credentials"),
-    ("rf scan", "RF spectrum analysis"),
-    ("rf replay", "Replay RF signal"),
-    ("rf jam", "Jam RF frequency"),
-    ("net scan", "Port scan target"),
-    ("net mitm", "Man-in-the-middle"),
-    ("net dos", "Denial of service"),
-    ("exploit", "Run exploit module"),
-    ("shell", "Reverse shell dropper"),
+const QUICK_COMMANDS: &[(&str, &str)] = &[
+    ("ls -la", "List all files"),
+    ("pwd", "Print working directory"),
+    ("git status", "Check git status"),
+    ("git log --oneline", "View commit history"),
+    ("clear", "Clear output"),
+    ("help", "Show help"),
+    ("exit", "Exit NyaShell"),
 ];
 
 const ALL_COMMANDS: &[(&str, &str, &str)] = &[
@@ -217,7 +206,7 @@ fn main() -> Result<()> {
     app_state.files = scan_directory(&app_state.current_dir);
     app_state.output_history.push(OutputEntry {
         command: "Welcome to NyaShell TUI!".to_string(),
-        output: "✨ Enhanced terminal with Node.js & Python support\n📚 6 tabs: Commands, History, Guide, Files, Settings, System Monitor\n🔍 Search commands and files with arrow keys\n🎨 Customize with gradient pastel themes\n💻 Execute JavaScript and Python files!\n📋 Ctrl+V or Shift+Insert to paste\n📊 Real-time system monitoring".to_string(),
+        output: "✨ Enhanced terminal with Node.js & Python support\n📚 7 tabs: Commands, History, Guide, Files, Settings, Monitor, Attacks\n🔍 Search commands and files with arrow keys\n🎨 Customize with gradient pastel themes\n💻 Execute JavaScript and Python files!\n📋 Ctrl+V or Shift+Insert to paste\n📊 Real-time system monitoring".to_string(),
         success: true,
         timestamp: Instant::now(),
     });
@@ -249,7 +238,7 @@ fn main() -> Result<()> {
                         }
                         KeyCode::Tab => {
                             if app_state.dropdown_open.is_none() {
-                                app_state.current_tab = (app_state.current_tab + 1) % 7;
+                                app_state.current_tab = (app_state.current_tab + 1) % 6;
                             }
                         }
                         KeyCode::Enter => {
@@ -468,337 +457,37 @@ fn execute_command(cmd: &str, cwd: &str) -> (String, bool) {
         return ("Output cleared!".to_string(), true);
     }
     if cmd.trim() == "help" {
-        return ("SECURITY LAB TERMINAL - ATTACK SUITE\n\nNavigation:\n  pwd - Print working directory\n  cd <dir> - Change directory\n\nAttacks:\n  wifi scan      - Scan WiFi networks (requires wlan adapter)\n  wifi deauth    - Deauth clients/AP (requires monitor mode)\n  wifi handshake - Capture handshake\n  wifi crack     - Crack WPA2 password\n  wifi eviltwin  - Create rogue AP\n  ble scan       - Scan Bluetooth LE devices\n  ble jam        - Block BLE signals\n  ble inject     - BLE HID injection\n  usb attack     - USB HID keystroke injection\n  usb harvest    - Harvest credentials\n  rf scan        - RF spectrum analysis (RTL-SDR)\n  rf replay      - Replay captured RF signal\n  rf jam         - Jam RF frequency\n  net scan       - Port scan target\n  net mitm       - Man-in-the-middle attack\n  net dos        - Denial of service attack\n  exploit        - Run exploit module\n  shell          - Reverse shell dropper\n\nStandard:\n  ls -la, dir, type, cat, find, grep\n\nWarning: FOR AUTHORIZED SECURITY TESTING ONLY".to_string(), true);
+        let help_text = "NyaShell TUI Commands:\n\nNavigation:\n  pwd - Print working directory\n  cd <dir> - Change directory\n\nFile Operations:\n  ls -la - List all files\n  dir - List files (Windows)\n  type <file> - Display file\n  cat <file> - Display file\n  find <pattern> - Search files\n  grep <pattern> <file> - Search in file\n\nGit:\n  git status - Repository status\n  git log --oneline - Commit history\n  git diff - Show changes\n  git commit -m \"msg\" - Commit\n  git push/pull - Sync remote\n\nNode.js:\n  node <file.js> - Execute JS\n  node -i - Open REPL\n  npm <cmd> - Run npm\n  npx <pkg> - Execute package\n\nPython:\n  python <file.py> - Execute Python\n  python -i - Open REPL\n  pip <cmd> - Run pip\n  py <file.py> - Execute (Windows)\n\nSystem:\n  clear - Clear output\n  exit - Quit NyaShell";
+        return (help_text.to_string(), true);
     }
 
-    // Attack command handler
-    let attack = match cmd.trim().to_lowercase().as_str() {
-        "wifi scan" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║     WiFi Scanner - Monitor Mode      ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Setting wlan0 to monitor mode...'
-netsh wlan show networks mode=bssid
-Write-Host ''
-Write-Host '[✓] Scan complete. Use "wifi deauth <BSSID>" to attack'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "wifi deauth" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║      Deauth Attack Initialized       ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[!] Requires: monitor mode + target BSSID'
-Write-Host '[!] Usage: wifi deauth <BSSID> <CHANNEL>'
-Write-Host ''
-Write-Host 'Set-NetAdapter -Name "Wi-Fi" -MacAddress "XX:XX:XX:XX:XX:XX"'
-Write-Host '[!] Power management disabled'
-Write-Host '[*] Sending deauth packets...'
-Write-Host '[*] Press Ctrl+C to stop'
-Write-Host ''
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "wifi handshake" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║     WPA Handshake Capture            ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Starting airodump-ng on monitor interface'
-Write-Host '[*] Waiting for handshake...'
-Write-Host '[*] Target: <SSID>'
-Write-Host ''
-Write-Host 'USE PREMIUM EDITION FOR FULL MODULE'
-Write-Host '[Security Lab Terminal - Demo Mode]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "wifi crack" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║       WPA2 Password Cracker          ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Loading handshake file...'
-Write-Host '[*] Loading wordlist: rockyou.txt'
-Write-Host '[*] Target hashcat mode: 2500'
-Write-Host ''
-Write-Host 'USE PREMIUM EDITION FOR FULL MODULE'
-Write-Host 'Requires: hashcat + good wordlist + handshake file'
-Write-Host '[Security Lab Terminal - Demo Mode]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "wifi eviltwin" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║        Evil Twin AP Attack           ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Creating rogue access point...'
-Write-Host '[*] Interface: wlan0 (monitor mode)'
-Write-Host '[*] ESSID: FreeWiFi'
-Write-Host '[*] Channel: 6'
-Write-Host ''
-Write-Host '[!] Starting hostapd...'
-Write-Host '[!] Starting dnsmasq (DHCP + DNS spoofing)...'
-Write-Host ''
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "ble scan" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║      BLE Scanner - Bluetooth LE      ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Scanning for BLE devices...'
-Write-Host '[*] This may take 30 seconds...'
-Write-Host ''
-Write-Host 'Device: <Device_Name>'
-Write-Host '  MAC: XX:XX:XX:XX:XX:XX'
-Write-Host '  RSSI: -72 dBm'
-Write-Host '  Services: Generic Access, Device Information'
-Write-Host ''
-Write-Host 'USE PREMIUM EDITION FOR FULL MODULE'
-Write-Host '[Security Lab Terminal - Demo Mode]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "ble jam" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║        BLE Jammer Attack              ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[!] WARNING: This device is FOR SECURITY TESTING ONLY'
-Write-Host ''
-Write-Host '[*] Target: <DEVICE_MAC>'
-Write-Host '[*] Jamming 2.4GHz BLE channels 37,38,39'
-Write-Host '[*] Sending block packets...'
-Write-Host ''
-Write-Host '[Ctrl+C] to stop'
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "ble inject" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║       BLE HID Keyboard Inject        ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Target: BLE Keyboard'
-Write-Host '[*] Finding GATT service...'
-Write-Host '[*] Connecting to HID service...'
-Write-Host ''
-Write-Host '[*] Sending keystrokes: <payload>'
-Write-Host ''
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "usb attack" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║       USB HID Attack (BadUSB)        ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[!] Insert Rubber Ducky / bad USB device'
-Write-Host ''
-Write-Host '[*] Payload: powershell -enc <encoded_ps>'
-Write-Host '[*] Waiting for device...'
-Write-Host '[*] Executing keystroke injection...'
-Write-Host ''
-Write-Host '[SECURITY LAB - PHYSICAL ACCESS REQUIRED]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "usb harvest" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║        USB Credential Harvester       ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Listing stored Windows credentials...'
-Write-Host '[*] Checking SAM database...'
-Write-Host '[*] Dumping cached passwords...'
-Write-Host ''
-cmdkey /list
-Write-Host ''
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "rf scan" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║        RF Spectrum Analyzer          ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Device: RTL-SDR USB'
-Write-Host '[*] Frequency: 433.92 MHz'
-Write-Host '[*] Bandwidth: 2 MHz'
-Write-Host ''
-Write-Host 'USE PREMIUM EDITION FOR FULL MODULE'
-Write-Host '[Requires RTL-SDR hardware]'
-Write-Host '[Security Lab Terminal - Demo Mode]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "rf replay" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║           RF Replay Attack           ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Loading captured signal: capture_433.bin'
-Write-Host '[*] Replaying signal on 433.92 MHz...'
-Write-Host '[*] TX Power: +20 dBm'
-Write-Host ''
-Write-Host '[Ctrl+C] to stop'
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "rf jam" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║            RF Jammer Attack           ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[!] WARNING: This device is FOR SECURITY TESTING ONLY'
-Write-Host ''
-Write-Host '[*] Target frequency: 433.92 MHz'
-Write-Host '[*] Jamming with noise signal...'
-Write-Host '[*] TX Power: +30 dBm'
-Write-Host ''
-Write-Host '[Ctrl+C] to stop'
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "net scan" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║           Network Port Scanner        ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Target: 192.168.1.1'
-Write-Host '[*] Scanning ports 1-1000...'
-Write-Host ''
-Write-Host 'PORT    STATE    SERVICE'
-Write-Host '22/tcp  open     ssh'
-Write-Host '80/tcp  open     http'
-Write-Host '443/tcp open     https'
-Write-Host '445/tcp open     smb'
-Write-Host '3389/tcp open    rdp'
-Write-Host ''
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "net mitm" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║        Man-In-The-Middle Attack      ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Enabling IP forwarding...'
-Write-Host '[*] Starting ARP spoofing...'
-Write-Host '[*] Target gateway: 192.168.1.1'
-Write-Host '[*] Intercepting traffic...'
-Write-Host ''
-Write-Host '[*] Starting packet capture...'
-Write-Host '[*] SSL strip active...'
-Write-Host ''
-Write-Host '[Ctrl+C] to stop'
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "net dos" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║          Denial of Service Attack    ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[!] WARNING: This device is FOR SECURITY TESTING ONLY'
-Write-Host ''
-Write-Host '[*] Target: <TARGET_IP>'
-Write-Host '[*] Port: 80'
-Write-Host '[*] Sending SYN flood...'
-Write-Host ''
-Write-Host 'Packets sent: <COUNT>'
-Write-Host 'Target: <TARGET_IP>:80'
-Write-Host ''
-Write-Host '[Ctrl+C] to stop'
-Write-Host '[SECURITY LAB - AUTHORIZED USE ONLY]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "exploit" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║            Exploit Module              ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] Loading exploit database...'
-Write-Host '[*] Available exploits:'
-Write-Host '  - EternalBlue (ms17-010)'
-Write-Host '  - BlueKeep (CVE-2019-0708)'
-Write-Host '  - SMBGhost (CVE-2020-0796)'
-Write-Host ''
-Write-Host 'USE PREMIUM EDITION FOR FULL MODULE'
-Write-Host '[Security Lab Terminal - Demo Mode]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        "shell" => {
-            let ps = r#"
-Write-Host '╔══════════════════════════════════════╗'
-Write-Host '║         Reverse Shell Dropper         ║'
-Write-Host '╚══════════════════════════════════════╝'
-Write-Host ''
-Write-Host '[*] LHOST: <YOUR_IP>'
-Write-Host '[*] LPORT: 4444'
-Write-Host '[*] Generating payload...'
-Write-Host ''
-Write-Host 'USE PREMIUM EDITION FOR FULL MODULE'
-Write-Host '[Requires: Metasploit framework]'
-Write-Host '[Security Lab Terminal - Demo Mode]'
-"#;
-            Command::new("powershell").args(["-NoProfile", "-Command", ps]).output()
-        }
-        _ => {
-            // Standard command execution
-            let parts: Vec<&str> = cmd.split_whitespace().collect();
-            if parts.is_empty() {
-                return ("".to_string(), true);
-            }
+    let parts: Vec<&str> = cmd.split_whitespace().collect();
+    if parts.is_empty() {
+        return ("".to_string(), true);
+    }
 
-            let executable = parts[0].to_lowercase();
-            let args = &parts[1..];
+    let executable = parts[0].to_lowercase();
+    let args = &parts[1..];
 
-            if executable == "node" || executable == "npm" || executable == "npx" {
-                Command::new(executable).args(args).current_dir(cwd).output()
-            } else if executable == "python" || executable == "pip" || executable == "py" {
-                let python_cmd = if executable == "py" { "python" } else { &executable };
-                Command::new(python_cmd).args(args).current_dir(cwd).output()
-            } else {
-                Command::new("powershell").args(["-NoProfile", "-Command", cmd]).current_dir(cwd).output()
-            }
-        }
+    let output = if executable == "node" || executable == "npm" || executable == "npx" {
+        Command::new(executable)
+            .args(args)
+            .current_dir(cwd)
+            .output()
+    } else if executable == "python" || executable == "pip" || executable == "py" {
+        let python_cmd = if executable == "py" { "python" } else { &executable };
+        Command::new(python_cmd)
+            .args(args)
+            .current_dir(cwd)
+            .output()
+    } else {
+        Command::new("powershell")
+            .args(["-NoProfile", "-Command", cmd])
+            .current_dir(cwd)
+            .output()
     };
 
-    match attack {
+    match output {
         Ok(result) => {
             let stdout = String::from_utf8_lossy(&result.stdout).to_string();
             let stderr = String::from_utf8_lossy(&result.stderr).to_string();
@@ -1116,15 +805,16 @@ fn render_header(
     };
     f.render_widget(Paragraph::new(dir_info), dir_area);
 
-        let tabs = Tabs::new(vec![
-            Line::from(vec![Span::styled("⚡ Commands", Style::default().fg(if state.current_tab == 0 { pink } else { cyan }))]),
-            Line::from(vec![Span::styled("📜 History", Style::default().fg(if state.current_tab == 1 { pink } else { cyan }))]),
-            Line::from(vec![Span::styled("🔍 Command Guide", Style::default().fg(if state.current_tab == 2 { pink } else { cyan }))]),
-            Line::from(vec![Span::styled("📁 Files", Style::default().fg(if state.current_tab == 3 { pink } else { cyan }))]),
-            Line::from(vec![Span::styled("⚙️ Settings", Style::default().fg(if state.current_tab == 4 { pink } else { cyan }))]),
-            Line::from(vec![Span::styled("📊 System Monitor", Style::default().fg(if state.current_tab == 5 { pink } else { cyan }))]),
-            Line::from(vec![Span::styled("⚔️ Attacks", Style::default().fg(if state.current_tab == 6 { pink } else { cyan }))]),
-        ])
+    let tabs = Tabs::new(vec![
+        Line::from(vec![Span::styled("⚡ Commands", Style::default().fg(if state.current_tab == 0 { pink } else { cyan }))]),
+        Line::from(vec![Span::styled("📜 History", Style::default().fg(if state.current_tab == 1 { pink } else { cyan }))]),
+        Line::from(vec![Span::styled("🔍 Command Guide", Style::default().fg(if state.current_tab == 2 { pink } else { cyan }))]),
+        Line::from(vec![Span::styled("📁 Files", Style::default().fg(if state.current_tab == 3 { pink } else { cyan }))]),
+        Line::from(vec![Span::styled("⚙️ Settings", Style::default().fg(if state.current_tab == 4 { pink } else { cyan }))]),
+        Line::from(vec![Span::styled("📊 System Monitor", Style::default().fg(if state.current_tab == 5 { pink } else { cyan }))]),
+        Line::from(vec![Span::styled("⚔️ Attacks", Style::default().fg(if state.current_tab == 6 { pink } else { cyan }))]),,
+    ])
+    .select(state.current_tab)
     .style(Style::default().fg(cyan))
     .highlight_style(Style::default().fg(pink).add_modifier(ratatui::style::Modifier::BOLD))
     .divider(Span::raw("│"));
@@ -1155,12 +845,13 @@ fn render_content(
         3 => render_files_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         4 => render_settings_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         5 => render_system_monitor_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
-        6 => render_attack_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
+        6 => render_attacks_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         _ => {}
     }
 }
 
-fn render_attack_tab(
+
+fn render_attacks_tab(
     f: &mut ratatui::Frame,
     area: Rect,
     state: &AppState,
@@ -1173,55 +864,65 @@ fn render_attack_tab(
     let block = Block::default()
         .title(Line::from(vec![
             Span::styled("⚔️ ", Style::default().fg(pink)),
-            Span::styled("Security Lab - Attack Suite", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD)),
+            Span::styled("Attacks", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD)),
         ]))
         .borders(Borders::ALL)
         .style(Style::default().bg(dark_bg))
         .border_style(Style::default().fg(purple));
 
-    let mut lines = vec![
-        Line::from(vec![Span::styled("╔══════════════════════════════════════════════════════════╗", Style::default().fg(purple))]),
-        Line::from(vec![Span::styled("║              SECURITY LAB - AUTHORIZED USE ONLY          ║", Style::default().fg(pink))]),
-        Line::from(vec![Span::styled("╚══════════════════════════════════════════════════════════╝", Style::default().fg(purple))]),
-        Line::from(vec![Span::raw("")]),
-        Line::from(vec![Span::styled("WiFi Attacks:", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD))]),
-        Line::from(vec![Span::styled("  [1] wifi scan      ", Style::default().fg(Color::White)), Span::styled("- Scan WiFi networks", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [2] wifi deauth    ", Style::default().fg(Color::White)), Span::styled("- Deauth clients/AP", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [3] wifi handshake ", Style::default().fg(Color::White)), Span::styled("- Capture handshake", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [4] wifi crack     ", Style::default().fg(Color::White)), Span::styled("- Crack WPA2 password", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [5] wifi eviltwin  ", Style::default().fg(Color::White)), Span::styled("- Create rogue AP", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::raw("")]),
-        Line::from(vec![Span::styled("Bluetooth LE Attacks:", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD))]),
-        Line::from(vec![Span::styled("  [6] ble scan       ", Style::default().fg(Color::White)), Span::styled("- Scan BLE devices", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [7] ble jam        ", Style::default().fg(Color::White)), Span::styled("- Block BLE signals", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [8] ble inject    ", Style::default().fg(Color::White)), Span::styled("- BLE HID injection", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::raw("")]),
-        Line::from(vec![Span::styled("USB Attacks:", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD))]),
-        Line::from(vec![Span::styled("  [9] usb attack     ", Style::default().fg(Color::White)), Span::styled("- USB HID attack", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [0] usb harvest   ", Style::default().fg(Color::White)), Span::styled("- Harvest credentials", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::raw("")]),
-        Line::from(vec![Span::styled("RF Attacks:", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD))]),
-        Line::from(vec![Span::styled("  [A] rf scan        ", Style::default().fg(Color::White)), Span::styled("- RF spectrum analysis", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [B] rf replay     ", Style::default().fg(Color::White)), Span::styled("- Replay RF signal", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [C] rf jam        ", Style::default().fg(Color::White)), Span::styled("- Jam RF frequency", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::raw("")]),
-        Line::from(vec![Span::styled("Network Attacks:", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD))]),
-        Line::from(vec![Span::styled("  [D] net scan       ", Style::default().fg(Color::White)), Span::styled("- Port scan target", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [E] net mitm      ", Style::default().fg(Color::White)), Span::styled("- Man-in-the-middle", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [F] net dos       ", Style::default().fg(Color::White)), Span::styled("- Denial of service", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::raw("")]),
-        Line::from(vec![Span::styled("Advanced:", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD))]),
-        Line::from(vec![Span::styled("  [G] exploit        ", Style::default().fg(Color::White)), Span::styled("- Run exploit module", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::styled("  [H] shell         ", Style::default().fg(Color::White)), Span::styled("- Reverse shell dropper", Style::default().fg(Color::Gray))]),
-        Line::from(vec![Span::raw("")]),
-        Line::from(vec![Span::styled("Type command name and press Enter to run", Style::default().fg(Color::Gray))]),
+    let attack_text = vec![
+        "⚡ WiFi Attacks:".to_string(),
+        "  wifi scan     - Scan for WiFi networks".to_string(),
+        "  wifi deauth   - Send deauth packets".to_string(),
+        "  wifi handshake - Capture WPA handshake".to_string(),
+        "  wifi crack    - Crack WPA2 password".to_string(),
+        "  wifi eviltwin - Create rogue AP".to_string(),
+        "  wifi wps      - WPS PIN attack".to_string(),
+        "".to_string(),
+        "📡 BLE Attacks:".to_string(),
+        "  ble scan     - Scan Bluetooth LE".to_string(),
+        "  ble jam      - Block BLE signals".to_string(),
+        "  ble inject   - BLE HID injection".to_string(),
+        "  ble sniff    - Passive BLE capture".to_string(),
+        "".to_string(),
+        "🔌 USB Attacks:".to_string(),
+        "  usb attack   - USB HID attack".to_string(),
+        "  usb harvest  - Harvest credentials".to_string(),
+        "  usb ducky    - USB RubberDucky".to_string(),
+        "".to_string(),
+        "📻 RF Attacks:".to_string(),
+        "  rf scan      - RF spectrum analysis".to_string(),
+        "  rf replay    - Replay RF signal".to_string(),
+        "  rf jam       - Jam RF frequency".to_string(),
+        "".to_string(),
+        "🌐 Network Attacks:".to_string(),
+        "  net scan     - Port scan target".to_string(),
+        "  net mitm     - Man-in-the-middle".to_string(),
+        "  net dos      - Denial of service".to_string(),
+        "  exploit      - Run exploit module".to_string(),
+        "  shell        - Reverse shell dropper".to_string(),
+        "".to_string(),
+        "⚠️  Security Testing Lab - Authorized Use Only!".to_string(),
     ];
 
-    let paragraph = Paragraph::new(lines)
-        .block(block)
-        .wrap(Wrap { trim: true });
+    let items: Vec<ListItem> = attack_text
+        .iter()
+        .enumerate()
+        .map(|(i, text)| {
+            let is_header = text.ends_with(':');
+            let style = if is_header {
+                Style::default().fg(pink).add_modifier(ratatui::style::Modifier::BOLD)
+            } else {
+                Style::default().fg(cyan)
+            };
+            ListItem::new(Line::from(Span::raw(text.clone()))).style(style)
+        })
+        .collect();
 
-    f.render_widget(paragraph, area);
+    let list = List::new(items)
+        .block(block)
+        .highlight_style(Style::default().bg(highlight).fg(Color::White));
+    f.render_widget(list, area);
 }
 
 fn render_commands_tab(
@@ -1248,7 +949,7 @@ fn render_commands_tab(
         .style(Style::default().bg(dark_bg))
         .border_style(Style::default().fg(purple));
 
-    let command_items: Vec<ListItem> = ATTACK_COMMANDS
+    let command_items: Vec<ListItem> = QUICK_COMMANDS
         .iter()
         .map(|(cmd, desc)| {
             ListItem::new(Line::from(vec![
