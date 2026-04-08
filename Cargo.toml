@@ -1,8 +1,8 @@
 [package]
-name = "nyashell"
+name = "nyaattack"
 version = "1.0.0"
-description = "NyaShell - Custom Terminal TUI"
-authors = ["NyaShell Team"]
+description = "NyaAttackShell - Security Testing Terminal"
+authors = ["ZapGaming"]
 edition = "2021"
 
 [dependencies]
