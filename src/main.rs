@@ -42,6 +42,8 @@ struct AppState {
     history_selected: usize,
     guide_selected: usize,
     files_selected: usize,
+    attack_selected: usize,
+    attack_confirm: bool,
     editing_setting: Option<usize>,
     last_update: Instant,
 }
@@ -199,6 +201,8 @@ fn main() -> Result<()> {
         history_selected: 0,
         guide_selected: 0,
         files_selected: 0,
+        attack_selected: 0,
+        attack_confirm: false,
         editing_setting: None,
         last_update: Instant::now(),
     };
@@ -227,7 +231,9 @@ fn main() -> Result<()> {
                 if key_event.kind == KeyEventKind::Press {
                     match key_event.code {
                         KeyCode::Esc => {
-                            if app_state.dropdown_open.is_some() {
+                            if app_state.attack_confirm {
+                                app_state.attack_confirm = false;
+                            } else if app_state.dropdown_open.is_some() {
                                 app_state.dropdown_open = None;
                             } else if app_state.editing_setting.is_some() {
                                 app_state.editing_setting = None;
@@ -264,6 +270,33 @@ fn main() -> Result<()> {
                                     2 => app_state.dropdown_open = Some(DropdownType::Background),
                                     _ => {}
                                 }
+                            } else if app_state.current_tab == 6 && app_state.dropdown_open.is_none() {
+                                if app_state.attack_confirm {
+                                    // Execute the attack
+                                    let _categories = ["wifi", "ble", "usb", "rf", "net", "exploit"];
+                                    let attacks = [
+                                        &["wifi_scan", "wifi_deauth", "wifi_handshake", "wifi_crack", "wifi_evil", "wifi_pmkid", "wifi_wps"][..],
+                                        &["ble_scan", "ble_jam", "ble_sniff", "ble_replay"][..],
+                                        &["usb_rubber", "usb_harvest"][..],
+                                        &["rf_scan", "rf_replay", "rf_jam"][..],
+                                        &["net_scan", "net_mitm", "net_sniff", "net_dns"][..],
+                                        &["shell", "hashcat", "hydra", "exploit"][..],
+                                    ];
+                                    let cat_idx = app_state.attack_selected.min(5);
+                                    let att_idx = app_state.attack_selected / 6;
+                                    let cmd = attacks.get(cat_idx).and_then(|a| a.get(att_idx.min(a.len()-1))).unwrap_or(&"help");
+                                    app_state.command_history.push(cmd.to_string());
+                                    let (output, success) = execute_command(cmd, &app_state.current_dir);
+                                    app_state.output_history.push(OutputEntry {
+                                        command: format!("⚔️ ATTACK: {}", cmd),
+                                        output,
+                                        success,
+                                        timestamp: Instant::now(),
+                                    });
+                                    app_state.attack_confirm = false;
+                                } else {
+                                    app_state.attack_confirm = true;
+                                }
                             } else if !app_state.command_input.is_empty() && app_state.dropdown_open.is_none() {
                                 let cmd = app_state.command_input.clone();
                                 if cmd == "exit" {
@@ -292,7 +325,13 @@ fn main() -> Result<()> {
                             }
                         }
                         KeyCode::Up => {
-                            if let Some(dropdown) = &mut app_state.dropdown_open {
+                            if app_state.attack_confirm {
+                                app_state.attack_confirm = false;
+                            } else if app_state.current_tab == 6 {
+                                if app_state.attack_selected > 0 {
+                                    app_state.attack_selected -= 1;
+                                }
+                            } else if let Some(dropdown) = &mut app_state.dropdown_open {
                                 match dropdown {
                                     DropdownType::Theme => {
                                         app_state.selected_setting = (app_state.selected_setting + THEMES.len() - 1) % THEMES.len()
@@ -333,7 +372,11 @@ fn main() -> Result<()> {
                             }
                         }
                         KeyCode::Down => {
-                            if let Some(dropdown) = &mut app_state.dropdown_open {
+                            if app_state.attack_confirm {
+                                // keep closed
+                            } else if app_state.current_tab == 6 {
+                                app_state.attack_selected += 1;
+                            } else if let Some(dropdown) = &mut app_state.dropdown_open {
                                 match dropdown {
                                     DropdownType::Theme => {
                                         app_state.selected_setting = (app_state.selected_setting + 1) % THEMES.len()
@@ -1349,34 +1392,119 @@ fn format_file_size(size: u64) -> String {
 }
 
 
-fn render_attack_tab(f: &mut ratatui::Frame, area: Rect, state: &AppState, pink: Color, purple: Color, cyan: Color, dark_bg: Color, highlight: Color) {
-    let block = Block::default()
-        .title(Line::from(vec![
-            Span::styled("⚔️ ", Style::default().fg(pink)),
-            Span::styled("Attack Suite", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD)),
-        ]))
+fn render_attack_tab(
+    f: &mut ratatui::Frame,
+    area: Rect,
+    state: &AppState,
+    pink: Color,
+    purple: Color,
+    cyan: Color,
+    dark_bg: Color,
+    highlight: Color,
+) {
+    let categories = ["WiFi", "BLE", "USB", "RF", "Network", "Exploit"];
+    let attacks_by_cat = [
+        vec!["wifi_scan:Discover networks", "wifi_deauth:Kick devices", "wifi_handshake:Capture keys", "wifi_crack:Crack password", "wifi_evil:Evil twin AP", "wifi_pmkid:Get PMKID", "wifi_wps:Brute WPS"],
+        vec!["ble_scan:Find BLE devices", "ble_jam:Block BLE", "ble_sniff:Capture BLE", "ble_replay:Replay packets"],
+        vec!["usb_rubber:HID attack", "usb_harvest:Get passwords"],
+        vec!["rf_scan:Spectrum", "rf_replay:Replay signal", "rf_jam:Jam RF"],
+        vec!["net_scan:Ports", "net_mitm:MITM attack", "net_sniff:Packets", "net_dns:DNS spoof"],
+        vec!["shell:Reverse shell", "hashcat:Crack hashes", "hydra:Brute force", "exploit:Run exploit"],
+    ];
+    
+    let selected_category = state.attack_selected.min(5);
+    let items = &attacks_by_cat[selected_category];
+    
+    // Left panel - categories
+    let left_width = 20u16;
+    let right_width = area.width.saturating_sub(left_width + 2);
+    
+    // Category list
+    let cat_items: Vec<ListItem> = categories.iter().enumerate().map(|(i, cat)| {
+        let is_selected = i == selected_category;
+        let style = if is_selected {
+            Style::default().bg(highlight).fg(Color::White)
+        } else {
+            Style::default().fg(cyan)
+        };
+        ListItem::new(Line::from(Span::styled(*cat, style)))
+    }).collect();
+    
+    let cat_block = Block::default()
+        .title(Line::from(vec![Span::styled("⚔️ ", Style::default().fg(pink)), Span::styled("ATTACKS", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD))]))
         .borders(Borders::ALL)
         .style(Style::default().bg(dark_bg))
         .border_style(Style::default().fg(purple));
-
-    let items: Vec<ListItem> = ATTACK_COMMANDS.iter().enumerate().map(|(i, (cmd, desc))| {
-        let is_selected = i == state.history_selected;
+    
+    let cat_list = List::new(cat_items).block(cat_block).highlight_style(Style::default().bg(highlight).fg(Color::White)).highlight_symbol("▶ ");
+    
+    let cat_area = Rect { x: area.x, y: area.y, width: left_width, height: area.height };
+    f.render_widget(cat_list, cat_area);
+    
+    // Right panel - attacks in category
+    let attack_items: Vec<ListItem> = items.iter().enumerate().map(|(i, item)| {
+        let parts: Vec<&str> = item.split(':').collect();
+        let cmd = parts[0];
+        let desc = if parts.len() > 1 { parts[1] } else { "" };
+        let is_selected = i == state.attack_selected % items.len();
         let style = if is_selected {
             Style::default().bg(highlight).fg(Color::White)
         } else {
             Style::default().fg(cyan)
         };
         ListItem::new(Line::from(vec![
-            Span::styled(*cmd, Style::default().fg(pink).add_modifier(ratatui::style::Modifier::BOLD)),
+            Span::styled(cmd, style),
             Span::raw(" - "),
-            Span::styled(*desc, style),
+            Span::styled(desc, Style::default().fg(Color::Gray)),
         ]))
     }).collect();
-
-    let list = List::new(items)
-        .block(block)
-        .highlight_style(Style::default().bg(highlight).fg(Color::White))
-        .highlight_symbol("▶ ");
-
-    f.render_widget(list, area);
+    
+    let attack_block = Block::default()
+        .title(Line::from(vec![Span::styled(categories[selected_category], Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD))]))
+        .borders(Borders::ALL)
+        .style(Style::default().bg(dark_bg))
+        .border_style(Style::default().fg(purple));
+    
+    let attack_list = List::new(attack_items).block(attack_block).highlight_style(Style::default().bg(highlight).fg(Color::White)).highlight_symbol("▶ ");
+    
+    let attack_area = Rect { x: area.x + left_width + 1, y: area.y, width: right_width, height: area.height };
+    f.render_widget(attack_list, attack_area);
+    
+    // Confirmation popup when confirm is open
+    if state.attack_confirm {
+        let popup_width = 50u16;
+        let popup_height = 15u16;
+        let popup_x = (area.width - popup_width) / 2 + area.x;
+        let popup_y = (area.height - popup_height) / 2 + area.y;
+        
+        let popup_area = Rect { x: popup_x, y: popup_y, width: popup_width, height: popup_height };
+        
+        let selected_item = items.get(state.attack_selected % items.len()).map(|s| s.split(':').collect::<Vec<_>>()).unwrap_or_default();
+        let cmd_name: &str = selected_item.first().cloned().unwrap_or("unknown");
+        let cmd_desc: &str = selected_item.get(1).cloned().unwrap_or("");
+        
+        let popup_block = Block::default()
+            .title(Line::from(vec![Span::styled("⚠️ CONFIRM ATTACK", Style::default().fg(Color::Red).add_modifier(ratatui::style::Modifier::BOLD))]))
+            .borders(Borders::ALL)
+            .style(Style::default().bg(Color::Rgb(20, 10, 10)))
+            .border_style(Style::default().fg(Color::Red));
+        
+        f.render_widget(popup_block, popup_area);
+        
+        let text = vec![
+            Line::from(Span::raw("")),
+            Line::from(vec![Span::styled("Command: ", Style::default().fg(Color::Gray)), Span::raw(&cmd_name[..]).style(Style::default().fg(Color::Red))]),
+            Line::from(Span::raw("")),
+            Line::from(vec![Span::styled("Description: ", Style::default().fg(Color::Gray)), Span::raw(&cmd_desc[..]).style(Style::default().fg(cyan))]),
+            Line::from(Span::raw("")),
+            Line::from(Span::styled("⚠️ Security testing tool only!", Style::default().fg(Color::Yellow))),
+            Line::from(Span::styled("⚠️ Use in authorized lab only!", Style::default().fg(Color::Yellow))),
+            Line::from(Span::raw("")),
+            Line::from(vec![Span::styled("[ENTER] Execute   [ESC] Cancel", Style::default().fg(Color::Green))]),
+        ];
+        
+        let para = Paragraph::new(text).style(Style::default().bg(dark_bg)).centered();
+        let inner_area = Rect { x: popup_x + 1, y: popup_y + 1, width: popup_width - 2, height: popup_height - 2 };
+        f.render_widget(para, inner_area);
+    }
 }
