@@ -24,7 +24,6 @@ use sysinfo::{System, SystemExt, DiskExt, NetworkExt, CpuExt, NetworksExt};
 mod config;
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct AppState {
     current_tab: usize,
     command_input: String,
@@ -48,7 +47,6 @@ struct AppState {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct OutputEntry {
     command: String,
     output: String,
@@ -57,7 +55,6 @@ struct OutputEntry {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct GitStatus {
     branch: String,
     staged: usize,
@@ -79,7 +76,6 @@ impl GitStatus {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct FileInfo {
     name: String,
     is_dir: bool,
@@ -87,7 +83,6 @@ struct FileInfo {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct SearchResult {
     path: String,
     line_num: usize,
@@ -95,14 +90,13 @@ struct SearchResult {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 enum DropdownType {
     Theme,
     AccentColor,
     Background,
 }
 
-const QUICK_COMMANDS: &[(&str, &str)] = &[
+const ATTACK_COMMANDS: &[(&str, &str)] = &[
     ("ls -la", "List all files"),
     ("pwd", "Print working directory"),
     ("git status", "Check git status"),
@@ -850,8 +844,8 @@ fn render_content(
         2 => render_guide_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         3 => render_files_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         4 => render_settings_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
-        6 => render_attacks_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         5 => render_system_monitor_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
+        6 => render_attack_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         _ => {}
     }
 }
@@ -880,7 +874,7 @@ fn render_commands_tab(
         .style(Style::default().bg(dark_bg))
         .border_style(Style::default().fg(purple));
 
-    let command_items: Vec<ListItem> = QUICK_COMMANDS
+    let command_items: Vec<ListItem> = ATTACK_COMMANDS
         .iter()
         .map(|(cmd, desc)| {
             ListItem::new(Line::from(vec![
@@ -1355,16 +1349,7 @@ fn format_file_size(size: u64) -> String {
 }
 
 
-fn render_attacks_tab(
-    f: &mut ratatui::Frame,
-    area: Rect,
-    _state: &AppState,
-    pink: Color,
-    purple: Color,
-    cyan: Color,
-    dark_bg: Color,
-    _highlight: Color,
-) {
+fn render_attack_tab(f: &mut ratatui::Frame, area: Rect, state: &AppState, pink: Color, purple: Color, cyan: Color, dark_bg: Color, highlight: Color) {
     let block = Block::default()
         .title(Line::from(vec![
             Span::styled("⚔️ ", Style::default().fg(pink)),
@@ -1374,22 +1359,24 @@ fn render_attacks_tab(
         .style(Style::default().bg(dark_bg))
         .border_style(Style::default().fg(purple));
 
-    use std::fmt::Write;
-    let mut text = String::new();
-    let cats = [("WIFI", vec!["scan","deauth","handshake","crack","eviltwin","pmkid"]),
-                ("BLE", vec!["scan","jam","inject","sniff","mitm","replay"]),
-                ("USB", vec!["ducky","harvest","shell","death","kick"]),
-                ("RF", vec!["scan","replay","jam","glitch","record"]),
-                ("NET", vec!["scan","mitm","dos","dns","arp","sslstrip"])];
-    for (cat, cmds) in cats.iter() {
-        writeln!(text, "[{}]", cat).ok();
-        for c in cmds { writeln!(text, "  {}", c).ok(); }
-        writeln!(text, "").ok();
-    }
+    let items: Vec<ListItem> = ATTACK_COMMANDS.iter().enumerate().map(|(i, (cmd, desc))| {
+        let is_selected = i == state.history_selected;
+        let style = if is_selected {
+            Style::default().bg(highlight).fg(Color::White)
+        } else {
+            Style::default().fg(cyan)
+        };
+        ListItem::new(Line::from(vec![
+            Span::styled(*cmd, Style::default().fg(pink).add_modifier(ratatui::style::Modifier::BOLD)),
+            Span::raw(" - "),
+            Span::styled(*desc, style),
+        ]))
+    }).collect();
 
-    let content = Paragraph::new(Line::from(vec![Span::raw(text)]))
-        .style(Style::default().bg(dark_bg));
+    let list = List::new(items)
+        .block(block)
+        .highlight_style(Style::default().bg(highlight).fg(Color::White))
+        .highlight_symbol("▶ ");
 
-    f.render_widget(block, area);
-    f.render_widget(content, area);
+    f.render_widget(list, area);
 }
