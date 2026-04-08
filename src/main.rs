@@ -205,8 +205,8 @@ fn main() -> Result<()> {
 
     app_state.files = scan_directory(&app_state.current_dir);
     app_state.output_history.push(OutputEntry {
-        command: "⚠️ SECURITY TESTING LAB - AUTHORIZED USE ONLY - README DISCLAIMER.md BEFORE USE!".to_string(),
-        output: "✨ Enhanced terminal with Node.js & Python support\n📚 7 tabs: Commands, History, Guide, Files, Settings, Monitor, Attacks\n🔍 Search commands and files with arrow keys\n🎨 Customize with gradient pastel themes\n💻 Execute JavaScript and Python files!\n📋 Ctrl+V or Shift+Insert to paste\n📊 Real-time system monitoring".to_string(),
+        command: "Welcome to NyaShell TUI!".to_string(),
+        output: "✨ Enhanced terminal with Node.js & Python support\n📚 6 tabs: Commands, History, Guide, Files, Settings, System Monitor\n🔍 Search commands and files with arrow keys\n🎨 Customize with gradient pastel themes\n💻 Execute JavaScript and Python files!\n📋 Ctrl+V or Shift+Insert to paste\n📊 Real-time system monitoring".to_string(),
         success: true,
         timestamp: Instant::now(),
     });
@@ -238,7 +238,7 @@ fn main() -> Result<()> {
                         }
                         KeyCode::Tab => {
                             if app_state.dropdown_open.is_none() {
-                                app_state.current_tab = (app_state.current_tab + 1) % 6;
+                                app_state.current_tab = (app_state.current_tab + 1) % 7;
                             }
                         }
                         KeyCode::Enter => {
@@ -812,7 +812,6 @@ fn render_header(
         Line::from(vec![Span::styled("📁 Files", Style::default().fg(if state.current_tab == 3 { pink } else { cyan }))]),
         Line::from(vec![Span::styled("⚙️ Settings", Style::default().fg(if state.current_tab == 4 { pink } else { cyan }))]),
         Line::from(vec![Span::styled("📊 System Monitor", Style::default().fg(if state.current_tab == 5 { pink } else { cyan }))]),
-        Line::from(vec![Span::styled("⚔️ Attacks", Style::default().fg(if state.current_tab == 6 { pink } else { cyan }))]),,
     ])
     .select(state.current_tab)
     .style(Style::default().fg(cyan))
@@ -845,84 +844,8 @@ fn render_content(
         3 => render_files_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         4 => render_settings_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         5 => render_system_monitor_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
-        6 => render_attacks_tab(f, area, state, pink, purple, cyan, dark_bg, highlight),
         _ => {}
     }
-}
-
-
-fn render_attacks_tab(
-    f: &mut ratatui::Frame,
-    area: Rect,
-    state: &AppState,
-    pink: Color,
-    purple: Color,
-    cyan: Color,
-    dark_bg: Color,
-    highlight: Color,
-) {
-    let block = Block::default()
-        .title(Line::from(vec![
-            Span::styled("⚔️ ", Style::default().fg(pink)),
-            Span::styled("Attacks", Style::default().fg(cyan).add_modifier(ratatui::style::Modifier::BOLD)),
-        ]))
-        .borders(Borders::ALL)
-        .style(Style::default().bg(dark_bg))
-        .border_style(Style::default().fg(purple));
-
-    let attack_text = vec![
-        "⚡ WiFi Attacks:".to_string(),
-        "  wifi scan     - Scan for WiFi networks".to_string(),
-        "  wifi deauth   - Send deauth packets".to_string(),
-        "  wifi handshake - Capture WPA handshake".to_string(),
-        "  wifi crack    - Crack WPA2 password".to_string(),
-        "  wifi eviltwin - Create rogue AP".to_string(),
-        "  wifi wps      - WPS PIN attack".to_string(),
-        "".to_string(),
-        "📡 BLE Attacks:".to_string(),
-        "  ble scan     - Scan Bluetooth LE".to_string(),
-        "  ble jam      - Block BLE signals".to_string(),
-        "  ble inject   - BLE HID injection".to_string(),
-        "  ble sniff    - Passive BLE capture".to_string(),
-        "".to_string(),
-        "🔌 USB Attacks:".to_string(),
-        "  usb attack   - USB HID attack".to_string(),
-        "  usb harvest  - Harvest credentials".to_string(),
-        "  usb ducky    - USB RubberDucky".to_string(),
-        "".to_string(),
-        "📻 RF Attacks:".to_string(),
-        "  rf scan      - RF spectrum analysis".to_string(),
-        "  rf replay    - Replay RF signal".to_string(),
-        "  rf jam       - Jam RF frequency".to_string(),
-        "".to_string(),
-        "🌐 Network Attacks:".to_string(),
-        "  net scan     - Port scan target".to_string(),
-        "  net mitm     - Man-in-the-middle".to_string(),
-        "  net dos      - Denial of service".to_string(),
-        "  exploit      - Run exploit module".to_string(),
-        "  shell        - Reverse shell dropper".to_string(),
-        "".to_string(),
-        "⚠️  Security Testing Lab - Authorized Use Only!".to_string(),
-    ];
-
-    let items: Vec<ListItem> = attack_text
-        .iter()
-        .enumerate()
-        .map(|(i, text)| {
-            let is_header = text.ends_with(':');
-            let style = if is_header {
-                Style::default().fg(pink).add_modifier(ratatui::style::Modifier::BOLD)
-            } else {
-                Style::default().fg(cyan)
-            };
-            ListItem::new(Line::from(Span::raw(text.clone()))).style(style)
-        })
-        .collect();
-
-    let list = List::new(items)
-        .block(block)
-        .highlight_style(Style::default().bg(highlight).fg(Color::White));
-    f.render_widget(list, area);
 }
 
 fn render_commands_tab(
