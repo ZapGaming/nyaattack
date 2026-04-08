@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            binary: nyaattack.exe
+          - target: x86_64-unknown-linux-musl
+            binary: nyaattack
+          - target: x86_64-apple-darwin
+            binary: nyaattack
+
+    runs-on: ${{ matrix.target == 'x86_64-pc-windows-msvc' && 'windows-latest' || 'ubuntu-latest' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          target: ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --features comprehensive
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/release/${{ matrix.binary }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
