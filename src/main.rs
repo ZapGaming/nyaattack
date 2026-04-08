@@ -205,7 +205,7 @@ fn main() -> Result<()> {
 
     app_state.files = scan_directory(&app_state.current_dir);
     app_state.output_history.push(OutputEntry {
-        command: "Welcome to NyaShell TUI!".to_string(),
+        command: "⚠️ SECURITY TESTING LAB - AUTHORIZED USE ONLY - README DISCLAIMER.md BEFORE USE!".to_string(),
         output: "✨ Enhanced terminal with Node.js & Python support\n📚 7 tabs: Commands, History, Guide, Files, Settings, Monitor, Attacks\n🔍 Search commands and files with arrow keys\n🎨 Customize with gradient pastel themes\n💻 Execute JavaScript and Python files!\n📋 Ctrl+V or Shift+Insert to paste\n📊 Real-time system monitoring".to_string(),
         success: true,
         timestamp: Instant::now(),
